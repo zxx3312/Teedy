@@ -102,6 +102,7 @@ public class UserResource extends BaseResource {
         user.setEmail(email);
         user.setStorageQuota(storageQuota);
         user.setOnboarding(true);
+        System.out.println("Login user: " + username + ", password: " + password);
 
         // Create the user
         UserDao userDao = new UserDao();
@@ -302,6 +303,8 @@ public class UserResource extends BaseResource {
         } else {
             // Login as a normal user
             user = AuthenticationUtil.authenticate(username, password);
+            System.out.println("Login user: " + username + ", password: " + password);
+
         }
         if (user == null) {
             throw new ForbiddenClientException();
