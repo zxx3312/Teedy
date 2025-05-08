@@ -1,4 +1,8 @@
 FROM ubuntu:22.04
+
+RUN mkdir -p /root/.m2 && \
+    echo "<settings><mirrors><mirror><id>alimaven</id><name>aliyun maven</name><url>http://maven.aliyun.com/nexus/content/groups/public/</url><mirrorOf>central</mirrorOf></mirror></mirrors></settings>" > /root/.m2/settings.xml
+
 LABEL maintainer="b.gamard@sismics.com"
 
 # Run Debian in non interactive mode
