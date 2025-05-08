@@ -14,7 +14,19 @@
     "password_lost_sent_title": "密码重置邮件已发送",
     "password_lost_sent_message": "重置密码的邮件已经发送至<strong>{{ username }}</strong>",
     "password_lost_error_title": "密码重置出错",
-    "password_lost_error_message": "无法发送密码重置邮件，请联系您的管理员进行手动重置"
+    "password_lost_error_message": "无法发送密码重置邮件，请联系您的管理员进行手动重置",
+    "request_account": "请求注册账号",
+    "back_to_login": "返回登录",
+    "register_request": "注册请求",
+    "reg_username": "用户名",
+    "reg_email": "邮箱",
+    "reg_password": "密码",
+    "submit_request": "提交请求",
+    "cancel": "取消",
+    "register_success_title": "注册成功",
+    "register_success_message": "您的注册请求已提交，请等待管理员审批。",
+    "register_error_title": "注册失败",
+    "register_error_message": "注册请求提交失败"
   },
   "passwordlost": {
     "title": "丢失密码",
@@ -233,6 +245,15 @@
       "title": "用户 & 群组",
       "message": "此处您可以浏览用户和群组信息."
     }
+  },
+  "admin": {
+    "pending_users_title": "待审批用户",
+    "pending_users_username": "用户名",
+    "pending_users_email": "邮箱",
+    "pending_users_request_date": "请求时间",
+    "pending_users_actions": "操作",
+    "pending_users_approve": "通过",
+    "pending_users_reject": "拒绝"
   },
   "settings": {
     "menu_personal_settings": "个人设置",

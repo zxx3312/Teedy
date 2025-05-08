@@ -24,6 +24,11 @@
     font-size: 90%;
     color: #666;
   }
+
+  /* Style for register section */
+  .register-section {
+    margin-top: 20px;
+  }
 </style>
 <div class="row vertical-center">
   <div class="col-sm-6 col-xs-12 login-box">
@@ -31,17 +36,17 @@
       <div class="col-lg-offset-4 col-lg-4 col-xs-offset-1 col-xs-10">
         <img src="img/title.png" class="img-responsive" />
 
-        <form>
+        <form name="loginForm" ng-show="!showRegisterForm">
           <div class="form-group">
             <label class="sr-only" for="inputUsername">{{ 'login.username' | translate }}</label>
             <input class="form-control" type="text" id="inputUsername" name="username"
-                   ng-attr-placeholder="{{ 'login.username' | translate }}" ng-model="user.username" />
+              ng-attr-placeholder="{{ 'login.username' | translate }}" ng-model="user.username" />
           </div>
 
           <div class="form-group">
             <label class="sr-only" for="inputPassword">{{ 'login.password' | translate }}</label>
             <input class="form-control" type="password" id="inputPassword" name="password"
-                   ng-attr-placeholder="{{ 'login.password' | translate }}" ng-model="user.password" />
+              ng-attr-placeholder="{{ 'login.password' | translate }}" ng-model="user.password" />
           </div>
 
           <span class="help-block" ng-if="codeRequired">
@@ -51,7 +56,7 @@
           <div class="form-group" ng-if="codeRequired">
             <label class="sr-only" for="inputCode">{{ 'login.validation_code' | translate }}</label>
             <input class="form-control" type="text" id="inputCode" name="code"
-                   ng-attr-placeholder="{{ 'login.validation_code' | translate }}" ng-model="user.code" />
+              ng-attr-placeholder="{{ 'login.validation_code' | translate }}" ng-model="user.code" />
           </div>
 
           <div class="checkbox text-muted">
@@ -74,12 +79,48 @@
             </div>
           </div>
 
-          <p class="text-center" ng-if="app.guest_login">&nbsp;</p>
+          <p class="text-center" ng-if="app.guest_login"> </p>
 
           <button type="submit" class="btn btn-default btn-block" ng-if="app.guest_login" ng-click="loginAsGuest()">
             <span class="fas fa-user"></span> {{ 'login.login_as_guest' | translate }}
           </button>
         </form>
+
+        <!-- Register Request Section -->
+        <div class="register-section" ng-show="showRegisterForm" style="background-color: skyblue;">
+          <h4>{{ 'login.register_request' | translate }}</h4>
+          <form name="registerForm">
+            <div class="form-group">
+              <label class="sr-only" for="regUsername">{{ 'login.reg_username' | translate }}</label>
+              <input class="form-control" type="text" id="regUsername" name="regUsername"
+                ng-attr-placeholder="{{ 'login.reg_username' | translate }}" ng-model="registerData.username"
+                required />
+            </div>
+            <div class="form-group">
+              <label class="sr-only" for="regEmail">{{ 'login.reg_email' | translate }}</label>
+              <input class="form-control" type="email" id="regEmail" name="regEmail"
+                ng-attr-placeholder="{{ 'login.reg_email' | translate }}" ng-model="registerData.email" required />
+            </div>
+            <div class="form-group">
+              <label class="sr-only" for="regPassword">{{ 'login.reg_password' | translate }}</label>
+              <input class="form-control" type="password" id="regPassword" name="regPassword"
+                ng-attr-placeholder="{{ 'login.reg_password' | translate }}" ng-model="registerData.password"
+                required />
+            </div>
+            <button type="submit" class="btn btn-success" ng-click="submitRegisterRequest()">
+              {{ 'login.submit_request' | translate }}
+            </button>
+            <button type="button" class="btn btn-default" ng-click="cancelRegister()">
+              {{ 'login.cancel' | translate }}
+            </button>
+          </form>
+        </div>
+
+        <!-- Toggle between Login and Register -->
+        <p class="text-center" style="background-color: skyblue;">
+          <a href ng-click="toggleRegisterForm()">{{ showRegisterForm ? 'login.back_to_login' : 'login.request_account'
+            | translate }}</a>
+        </p>
       </div>
     </div>
   </div>

@@ -1,53 +1,55 @@
 pipeline {
     agent any
+    
+    environment {
+        DOCKER_HUB_CREDENTIALS = credentials('dockerhub_credentials')
+        DOCKER_IMAGE = 'your-dockerhub/teedy-app'
+        DOCKER_TAG = "${env.BUILD_NUMBER}"
+    }
+    
     stages {
-        stage('Clean') {
+        stage('Checkout') {
             steps {
-                sh 'mvn clean'
+                checkout scmGit(
+                    branches: [[name: '*/master']],
+                    userRemoteConfigs: [[url: 'https://github.com/your-repo/Teedy.git']]
+                )
             }
         }
-        stage('Compile') {
+        
+        stage('Build') {
             steps {
-                sh 'mvn compile'
+                sh 'mvn -B -DskipTests clean package'
             }
         }
-        stage('Test') {
+        
+        stage('Build Docker Image') {
             steps {
-                sh 'mvn test -Dmaven.test.failure.ignore=true'
+                script {
+                    docker.build("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}")
+                }
             }
         }
-        stage('PMD') {
+        
+        stage('Push to Docker Hub') {
             steps {
-                sh 'mvn pmd:pmd'
+                script {
+                    docker.withRegistry('https://registry.hub.docker.com', 'DOCKER_HUB_CREDENTIALS') {
+                        docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").push()
+                        docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").push('latest')
+                    }
+                }
             }
         }
-        stage('JaCoCo') {
+        
+        stage('Deploy') {
             steps {
-                sh 'mvn jacoco:report'
-            }
-        }
-        stage('Javadoc') {
-            steps {
-                sh 'mvn javadoc:javadoc'
-            }
-        }
-        stage('Site') {
-            steps {
-                sh 'mvn site'
-            }
-        }
-        stage('Package') {
-            steps {
-                sh 'mvn package -DskipTests'
+                script {
+                    sh 'docker stop teedy-container || true'
+                    sh 'docker rm teedy-container || true'
+                    docker.image("${env.DOCKER_IMAGE}:${env.DOCKER_TAG}").run('-name teedy-container -d -p 8080:8080')
+                }
             }
         }
     }
-    post {
-        always {
-            archiveArtifacts artifacts: '**/target/site/**/*.*', fingerprint: true
-            archiveArtifacts artifacts: '**/target/**/*.jar', fingerprint: true
-            archiveArtifacts artifacts: '**/target/**/*.war', fingerprint: true
-            junit '**/target/surefire-reports/*.xml'
-        }
-    }
-}
+

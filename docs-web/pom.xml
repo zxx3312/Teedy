@@ -135,6 +135,35 @@
       <scope>test</scope>
     </dependency>
 
+    <!-- JAX-RS API (Jakarta EE) -->
+    <dependency>
+        <groupId>jakarta.ws.rs</groupId>
+        <artifactId>jakarta.ws.rs-api</artifactId>
+        <version>3.1.0</version> <!-- 确保与项目版本兼容 -->
+    </dependency>
+
+    <!-- JSON-P API (Jakarta EE) -->
+    <dependency>
+        <groupId>jakarta.json</groupId>
+        <artifactId>jakarta.json-api</artifactId>
+        <version>2.1.1</version> <!-- 确保与项目版本兼容 -->
+    </dependency>
+
+    <!-- JSON-P Implementation (e.g., Glassfish) -->
+    <dependency>
+        <groupId>org.glassfish</groupId>
+        <artifactId>jakarta.json</artifactId>
+        <version>2.0.1</version> <!-- 确保与项目版本兼容 -->
+    </dependency>
+
+    <!-- Ensure dependency on docs-core -->
+    <dependency>
+        <groupId>com.sismics.docs</groupId>
+        <artifactId>docs-core</artifactId>
+        <version>${project.version}</version>
+    </dependency>
+    
+
   </dependencies>
 
   <build>
