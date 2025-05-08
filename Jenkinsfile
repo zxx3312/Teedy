@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         DOCKER_HUB_CREDENTIALS = credentials('dockerhub_credentials')
-        DOCKER_IMAGE = 'your-dockerhub/teedy-app'
+        DOCKER_IMAGE = 'cynthia3312/teedy-app'
         DOCKER_TAG = "${env.BUILD_NUMBER}"
     }
     
@@ -12,7 +12,7 @@ pipeline {
             steps {
                 checkout scmGit(
                     branches: [[name: '*/master']],
-                    userRemoteConfigs: [[url: 'https://github.com/your-repo/Teedy.git']]
+                    userRemoteConfigs: [[url: 'https://github.com/zxx3312/Teedy.git']]
                 )
             }
         }
