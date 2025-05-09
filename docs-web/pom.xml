@@ -277,7 +277,7 @@
                       <arg line="/c grunt --apiurl=api" />
                     </exec>
                     <exec executable="grunt" dir="${project.basedir}/src/main/webapp" osfamily="unix" failonerror="true">
-                      <arg line="/c grunt default --apiurl=api" />
+                      <arg line="/c grunt --apiurl=api" />
                     </exec>
                   </target>
                 </configuration>
