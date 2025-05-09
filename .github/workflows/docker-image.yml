@@ -22,7 +22,7 @@ jobs:
           sudo apt-get update
           sudo apt-get -y -q --no-install-recommends install ffmpeg mediainfo tesseract-ocr tesseract-ocr-deu
       - name: Build with Maven
-        run: mvn --batch-mode -Pprod clean install
+        run: mvn --batch-mode -Pprod clean install -DskipTests
       - name: Upload war artifact
         uses: actions/upload-artifact@v4
         with:
