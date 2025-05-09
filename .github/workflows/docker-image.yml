@@ -17,6 +17,13 @@ jobs:
           java-version: "11"
           distribution: "temurin"
           cache: maven
+
+      - name: Debug grunt
+        run: |
+          cd docs-web/src/main/webapp
+          grunt default --apiurl=api --verbose
+
+          
       - name: Install test dependencies
         run: |
           sudo apt-get update
