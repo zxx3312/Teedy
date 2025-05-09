@@ -21,16 +21,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get -y -q --no-install-recommends install ffmpeg mediainfo tesseract-ocr tesseract-ocr-deu
-      - name: Install Grunt and dependencies
+      - name: Install dependencies
         run: |
-          cd docs-web/src/main/webapp
-          npm install grunt-cli --save-dev
           npm install
-      - name: Check Grunt
-        run: |
-          node_modules/.bin/grunt --version
-          node_modules/.bin/grunt default --apiurl=api --verbose
-        working-directory: docs-web/src/main/webapp
       - name: Build with Maven
         run: mvn --batch-mode -Pprod clean install -DskipTests
       - name: Upload war artifact
