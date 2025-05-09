@@ -56,10 +56,16 @@ module.exports = function(grunt) {
     },
     uglify: {
       docs: {
+        options: {
+          ecma: 6,
+        },
         src: 'dist/docs.js',
         dest: 'dist/docs.min.js'
       },
       share: {
+        options: {
+          ecma: 6,
+        },
         src: 'dist/share.js',
         dest: 'dist/share.min.js'
       }
