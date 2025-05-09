@@ -17,6 +17,12 @@ jobs:
           java-version: "11"
           distribution: "temurin"
           cache: maven
+          
+      - name: Install grunt and dependencies
+        working-directory: docs-web/src/main/webapp
+        run: |
+          npm install grunt --save-dev        # 安装 grunt 本体
+          npm install                         # 安装项目的其他依赖
 
       - name: Debug grunt
         run: |
