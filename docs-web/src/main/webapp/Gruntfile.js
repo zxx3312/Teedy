@@ -54,20 +54,24 @@ module.exports = function(grunt) {
         dest: 'dist/style/style.min.css'
       }
     },
-    uglify: {
+    terser: {
+      options: {
+        mangle: true,
+        compress: true,
+        ecma: 6,  // 确保支持 ES6 语法
+        output: {
+          beautify: false
+        }
+      },
       docs: {
-        options: {
-          ecma: 6,
-        },
-        src: 'dist/docs.js',
-        dest: 'dist/docs.min.js'
+        files: {
+          'dist/docs.min.js': ['dist/docs.js']
+        }
       },
       share: {
-        options: {
-          ecma: 6,
-        },
-        src: 'dist/share.js',
-        dest: 'dist/share.min.js'
+        files: {
+          'dist/share.min.js': ['dist/share.js']
+        }
       }
     },
     ngtemplates: {
