@@ -272,13 +272,16 @@
                     <exec executable="npm" dir="${project.basedir}/src/main/webapp" osfamily="unix" failonerror="true">
                       <arg line="install" />
                     </exec>
-                    <!-- grunt -->
-                    <exec executable="node_modules/.bin/grunt" dir="${project.basedir}/src/main/webapp" osfamily="unix" failonerror="true">
+                    <!-- Unix 系统调用全局 grunt -->
+                    <exec executable="grunt" dir="${project.basedir}/src/main/webapp" osfamily="unix" failonerror="true">
                         <arg line="default --apiurl=api --verbose"/>
                     </exec>
+                    
+                    <!-- Windows 系统调用全局 grunt -->
                     <exec executable="cmd" dir="${project.basedir}/src/main/webapp" osfamily="windows" failonerror="true">
-                        <arg line="/c node_modules\\.bin\\grunt default --apiurl=api --verbose"/>
+                        <arg line="/c grunt default --apiurl=api --verbose"/>
                     </exec>
+
                   </target>
                 </configuration>
                 <goals>
