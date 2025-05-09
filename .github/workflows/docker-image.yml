@@ -17,6 +17,10 @@ jobs:
           java-version: "11"
           distribution: "temurin"
           cache: maven
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # 设置 Node.js 版本为 18.x
           
       - name: Install grunt and dependencies
         working-directory: docs-web/src/main/webapp
