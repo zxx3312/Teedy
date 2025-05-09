@@ -17,24 +17,6 @@ jobs:
           java-version: "11"
           distribution: "temurin"
           cache: maven
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'  # 设置 Node.js 版本为 18.x
-          
-      - name: Install grunt and dependencies
-        working-directory: docs-web/src/main/webapp
-        run: |
-          npm install grunt --save-dev        # 安装 grunt 本体
-          npm install terser --save-dev
-          npm install                         # 安装项目的其他依赖
-
-      - name: Debug grunt
-        run: |
-          cd docs-web/src/main/webapp
-          grunt default --apiurl=api --verbose
-
-          
       - name: Install test dependencies
         run: |
           sudo apt-get update
