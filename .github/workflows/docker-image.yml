@@ -21,10 +21,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get -y -q --no-install-recommends install ffmpeg mediainfo tesseract-ocr tesseract-ocr-deu
-      - name: Install dependencies
-        working-directory: docs-web/src/main/webapp
-        run: |
-          npm install
       - name: Build with Maven
         run: mvn --batch-mode -Pprod clean install -DskipTests
       - name: Upload war artifact
