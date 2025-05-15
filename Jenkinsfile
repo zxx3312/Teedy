@@ -3,7 +3,7 @@ pipeline {
     environment {
         DEPLOYMENT_NAME = "hello-node"
         CONTAINER_NAME = "docs"
-        IMAGE_NAME = "sismics/docs:latest"
+        IMAGE_NAME = "cynthia3312/teedy-app:1"
     }
     stages {
         stage('Start Minikube') {
