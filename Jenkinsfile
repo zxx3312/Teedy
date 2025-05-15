@@ -11,7 +11,6 @@ pipeline {
                 sh '''
                     if ! minikube status | grep -q "Running"; then
                         echo "Starting Minikube..."
-                        minikube start --driver=docker --container-runtime=containerd --image-repository=registry.aliyuncs.com/google_containers
                     else
                         echo "Minikube already running."
                     fi
