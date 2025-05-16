@@ -395,3 +395,4 @@ public class UserDao {
         return ((Number) query.getSingleResult()).longValue();
     }
 }
+
