@@ -7,6 +7,10 @@ angular.module('docs').controller('DocumentViewContent', function ($scope, $root
   $scope.displayMode = _.isUndefined(localStorage.fileDisplayMode) ? 'grid' : localStorage.fileDisplayMode;
   $scope.openedFile = undefined;
 
+  $scope.acceptedLanguages = $rootScope.acceptedLanguages; // 从 app.js 获取语言列表
+  $scope.selectedLanguage = $scope.acceptedLanguages[0]; // 默认选择第一个语言
+  $scope.translatedDocument = null;
+
   /**
    * Watch for display mode change.
    */
@@ -21,12 +25,12 @@ angular.module('docs').controller('DocumentViewContent', function ($scope, $root
     forceHelperSize: true,
     forcePlaceholderSize: true,
     tolerance: 'pointer',
-    start: function() {
+    start: function () {
       $(this).addClass('currently-dragging');
     },
     stop: function () {
       var _this = this;
-      setTimeout(function(){
+      setTimeout(function () {
         $(_this).removeClass('currently-dragging');
       }, 300);
 
@@ -67,8 +71,8 @@ angular.module('docs').controller('DocumentViewContent', function ($scope, $root
     var title = $translate.instant('document.view.content.delete_file_title');
     var msg = $translate.instant('document.view.content.delete_file_message');
     var btns = [
-      {result: 'cancel', label: $translate.instant('cancel')},
-      {result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}
+      { result: 'cancel', label: $translate.instant('cancel') },
+      { result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }
     ];
 
     $dialog.messageBox(title, msg, btns, function (result) {
@@ -131,7 +135,7 @@ angular.module('docs').controller('DocumentViewContent', function ($scope, $root
 
       // Uploading files sequentially
       var key = 0;
-      var then = function() {
+      var then = function () {
         if (files[key]) {
           $scope.uploadFile(files[key], newfiles[key++]).then(then);
         }
@@ -143,7 +147,7 @@ angular.module('docs').controller('DocumentViewContent', function ($scope, $root
   /**
    * Upload a file.
    */
-  $scope.uploadFile = function(file, newfile, previousFileId) {
+  $scope.uploadFile = function (file, newfile, previousFileId) {
     // Upload the file
     newfile.status = $translate.instant('document.view.content.upload_progress');
     return Upload.upload({
@@ -155,23 +159,23 @@ angular.module('docs').controller('DocumentViewContent', function ($scope, $root
         previousFileId: previousFileId
       }
     })
-    .progress(function(e) {
-      newfile.progress = parseInt(100.0 * e.loaded / e.total);
-    })
-    .success(function(data) {
-      // Update local model with real data
-      newfile.id = data.id;
-      newfile.size = data.size;
+      .progress(function (e) {
+        newfile.progress = parseInt(100.0 * e.loaded / e.total);
+      })
+      .success(function (data) {
+        // Update local model with real data
+        newfile.id = data.id;
+        newfile.size = data.size;
 
-      // New file uploaded, increase used quota
-      $rootScope.userInfo.storage_current += data.size;
-    })
-    .error(function (data) {
-      newfile.status = $translate.instant('document.view.content.upload_error');
-      if (data.type === 'QuotaReached') {
-        newfile.status += ' - ' + $translate.instant('document.view.content.upload_error_quota');
-      }
-    });
+        // New file uploaded, increase used quota
+        $rootScope.userInfo.storage_current += data.size;
+      })
+      .error(function (data) {
+        newfile.status = $translate.instant('document.view.content.upload_error');
+        if (data.type === 'QuotaReached') {
+          newfile.status += ' - ' + $translate.instant('document.view.content.upload_error_quota');
+        }
+      });
   };
 
   /**
@@ -224,4 +228,55 @@ angular.module('docs').controller('DocumentViewContent', function ($scope, $root
       }
     })
   };
+
+  /**
+   * Translate the document.
+   */
+  $scope.translateDocument = function () {
+    var translatePayload = {
+      documentId: $stateParams.id,
+      targetLanguage: $scope.selectedLanguage.key
+    };
+
+    Restangular.one('document').one($stateParams.id).all('translate').post(translatePayload).then(function (response) {
+      $scope.translatedDocument = response;
+    }, function (error) {
+      console.error('Translation failed:', error);
+      $translate('document.translate.error').then(function (msg) {
+        $dialog.messageBox($translate.instant('error'), msg, [{ result: 'ok', label: $translate.instant('ok') }]);
+      });
+    });
+  };
+
+  /**
+   * Save the translated document.
+   */
+  $scope.saveTranslatedDocument = function () {
+    if (!$scope.document.writable) {
+      $translate('document.translate.no_permission').then(function (msg) {
+        $dialog.messageBox($translate.instant('error'), msg, [{ result: 'ok', label: $translate.instant('ok') }]);
+      });
+      return;
+    }
+
+    Restangular.one('document', $stateParams.id).post('', {
+      title: $scope.translatedDocument.title,
+      description: $scope.translatedDocument.description,
+      language: $scope.selectedLanguage.key
+    }).then(function () {
+      $translate('document.translate.saved').then(function (msg) {
+        $dialog.messageBox($translate.instant('success'), msg, [{ result: 'ok', label: $translate.instant('ok') }]);
+      });
+      $scope.document.title = $scope.translatedDocument.title;
+      $scope.document.description = $scope.translatedDocument.description;
+      $scope.document.language = $scope.selectedLanguage.key;
+      $scope.translatedDocument = null;
+    }, function (error) {
+      console.error('Failed to save translated document:', error);
+      $translate('document.translate.save_error').then(function (msg) {
+        $dialog.messageBox($translate.instant('error'), msg, [{ result: 'ok', label: $translate.instant('ok') }]);
+      });
+    });
+  };
+
 });

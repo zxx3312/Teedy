@@ -162,6 +162,12 @@
         <artifactId>docs-core</artifactId>
         <version>${project.version}</version>
     </dependency>
+
+    <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>4.5.13</version>
+    </dependency>
     
 
   </dependencies>
@@ -217,6 +223,9 @@
                 <contextPath>/docs-web</contextPath>
                 <overrideDescriptor>${project.basedir}/src/dev/main/webapp/web-override.xml</overrideDescriptor>
               </webApp>
+              <httpConnector>
+                <port>8081</port>
+              </httpConnector>
             </configuration>
           </plugin>
           

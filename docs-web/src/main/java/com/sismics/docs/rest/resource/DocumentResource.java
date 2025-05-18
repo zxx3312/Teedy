@@ -89,6 +89,20 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 
+
+import java.security.MessageDigest; // 用于生成 MD5 签名
+import java.security.NoSuchAlgorithmException; // 处理 MD5 算法异常
+import java.net.HttpURLConnection; // 发送 HTTP 请求
+import java.net.URL; // 构造 API 请求 URL
+import java.net.URLEncoder; // URL 编码查询参数
+import java.io.BufferedReader; // 读取 HTTP 响应
+import java.io.InputStreamReader; // 处理输入流
+import jakarta.json.JsonReader; // 解析百度翻译 API 的 JSON 响应
+import jakarta.json.JsonObject; // 处理 JSON 对象
+import java.util.Properties;
+import java.util.Random;
+
+
 /**
  * Document REST resources.
  *
@@ -96,6 +110,170 @@ import java.util.UUID;
  */
 @Path("/document")
 public class DocumentResource extends BaseResource {
+
+    /**
+     * Translate document content.
+     *
+     * @param documentId Document ID
+     * @param targetLanguage Target language code (e.g., chi_sim, eng)
+     * @return Response
+     */
+    @POST
+    @Path("{id: [a-z0-9\\-]+}/translate")
+    public Response translate(
+            @PathParam("id") String documentId,
+            @FormParam("targetLanguage") String targetLanguage) {
+        if (!authenticate()) {
+            throw new ForbiddenClientException();
+        }
+
+        // Validate input
+        if (targetLanguage == null || targetLanguage.isEmpty()) {
+            throw new ClientException("ValidationError", "Target language is required");
+        }
+
+        // Get document
+        DocumentDao documentDao = new DocumentDao();
+        Document document = documentDao.getById(documentId);
+        if (document == null) {
+            throw new NotFoundException();
+        }
+
+        // Translate document content using Baidu Translate API
+        try {
+            BaiduTranslationService translationService = new BaiduTranslationService();
+            String translatedTitle = translationService.translate(document.getTitle(), document.getLanguage(), targetLanguage);
+            String translatedDescription = document.getDescription() != null
+                    ? translationService.translate(document.getDescription(), document.getLanguage(), targetLanguage)
+                    : null;
+
+            // Return translated result
+            JsonObjectBuilder response = Json.createObjectBuilder()
+                    .add("id", documentId)
+                    .add("title", translatedTitle)
+                    .add("description", JsonUtil.nullable(translatedDescription))
+                    .add("language", targetLanguage);
+            return Response.ok().entity(response.build()).build();
+        } catch (IOException e) {
+            throw new ServerException("TranslationError", "Error translating document", e);
+        }
+    }
+
+    /**
+     * Baidu Translation Service implementation.
+     */
+    private static class BaiduTranslationService {
+        private static final String APP_ID;
+        private static final String SECRET_KEY;
+        private static final String API_URL = "http://api.fanyi.baidu.com/api/trans/vip/translate";
+
+        // 静态初始化块加载配置
+        static {
+            Properties props = new Properties();
+            try (InputStream input = BaiduTranslationService.class.getClassLoader().getResourceAsStream("config.properties")) {
+                if (input == null) {
+                    System.err.println("Error: config.properties not found in classpath");
+                    throw new IllegalStateException("config.properties not found");
+                }
+                props.load(input);
+                System.out.println("Loaded config.properties: " + props);
+                APP_ID = props.getProperty("baidu.translate.appid");
+                SECRET_KEY = props.getProperty("baidu.translate.secretkey");
+                System.out.println("APP_ID: " + APP_ID + ", SECRET_KEY: " + SECRET_KEY);
+                if (APP_ID == null || SECRET_KEY == null) {
+                    throw new IllegalStateException("Baidu translation configuration missing in config.properties");
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException("Failed to load config.properties", e);
+            }
+        }
+
+        public String translate(String text, String sourceLang, String targetLang) throws IOException {
+            if (text == null || text.isEmpty()) {
+                return text;
+            }
+
+            // Map Teedy language codes to Baidu language codes
+            String fromLang = mapToBaiduLangCode(sourceLang);
+            String toLang = mapToBaiduLangCode(targetLang);
+
+            // Generate random salt and sign
+            String salt = String.valueOf(new Random().nextInt(1000000000));
+            String sign = md5(APP_ID + text + salt + SECRET_KEY);
+
+            // Build query parameters
+            String query = String.format("q=%s&from=%s&to=%s&appid=%s&salt=%s&sign=%s",
+                    URLEncoder.encode(text, "UTF-8"),
+                    fromLang,
+                    toLang,
+                    APP_ID,
+                    salt,
+                    sign);
+
+            // Send request to Baidu API
+            URL url = new URL(API_URL + "?" + query);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+
+            // Read response
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"))) {
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+
+                // Parse JSON response
+                try (JsonReader jsonReader = Json.createReader(new java.io.StringReader(response.toString()))) {
+                    JsonObject jsonObject = jsonReader.readObject();
+                    if (jsonObject.containsKey("error_code")) {
+                        throw new IOException("Baidu API error: " + jsonObject.getString("error_msg"));
+                    }
+                    JsonObject transResult = jsonObject.getJsonArray("trans_result").getJsonObject(0);
+                    return transResult.getString("dst");
+                }
+            } finally {
+                conn.disconnect();
+            }
+        }
+
+        private String mapToBaiduLangCode(String teedyLangCode) {
+            switch (teedyLangCode) {
+                case "eng": return "en";
+                case "chi_sim": return "zh";
+                case "chi_tra": return "cht";
+                case "fra": return "fra";
+                case "ita": return "it";
+                case "deu": return "de";
+                case "spa": return "spa";
+                case "por": return "pt";
+                case "pol": return "pl";
+                case "rus": return "ru";
+                case "jpn": return "jp";
+                case "kor": return "kor";
+                case "ara": return "ara";
+                case "hin": return "hi";
+                case "tha": return "th";
+                case "vie": return "vi";
+                default: return "auto"; // Baidu supports auto-detection
+            }
+        }
+
+        private String md5(String input) {
+            try {
+                MessageDigest md = MessageDigest.getInstance("MD5");
+                byte[] array = md.digest(input.getBytes("UTF-8"));
+                StringBuilder sb = new StringBuilder();
+                for (byte b : array) {
+                    sb.append(String.format("%02x", b));
+                }
+                return sb.toString();
+            } catch (NoSuchAlgorithmException | java.io.UnsupportedEncodingException e) {
+                throw new RuntimeException("MD5 calculation failed", e);
+            }
+        }
+    }
 
     /**
      * Returns a document.

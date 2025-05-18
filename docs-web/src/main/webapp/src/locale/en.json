@@ -39,6 +39,18 @@
     "global_quota_warning": "<strong>Warning!</strong> Global quota almost reached at {{ current | number: 0 }}MB ({{ percent | number: 1 }}%) used on {{ total | number: 0 }}MB"
   },
   "document": {
+    "translate": {
+      "select_language": "Select Language",
+      "button": "Translate Document",
+      "result": "Translated Document",
+      "title": "Title",
+      "description": "Description",
+      "save": "Save Translated Document",
+      "error": "Failed to translate document. Please try again.",
+      "no_permission": "You do not have permission to save the translated document.",
+      "saved": "Translated document saved successfully.",
+      "save_error": "Failed to save translated document."
+    },
     "navigation_up": "Go up one level",
     "toggle_navigation": "Toggle folder navigation",
     "display_mode_list": "Display documents in list",
